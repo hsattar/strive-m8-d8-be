@@ -13,14 +13,15 @@ let onlineUsers = []
 
 io.on('connection', socket => {
     
-    socket.on('setUsername', ({ username }) => {
+    socket.on('setUsername', ({ username, room }) => {
         onlineUsers.push({ username, id: socket.id })
+        socket.join(room)
         socket.emit('loggedin')
         socket.broadcast.emit('newConnection')
     })
 
-    socket.on('sendMessage', (message) => {
-        socket.broadcast.emit('message', message)
+    socket.on('sendMessage', ({ message, room }) => {
+        socket.to(room).emit('message', message)
     })
 
     socket.on('disconnect', () => onlineUsers = onlineUsers.filter(user => user.id !== socket.id))
